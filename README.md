@@ -93,17 +93,7 @@ tasks:
 
 如果 PNG/PDF 导出失败，页面会显示友好提示。当前页面按钮优先走 Matplotlib 兜底导出，可避开 Kaleido/Chrome 超时问题。
 
-## API Key 安全
 
-不要把 API Key 提交到 GitHub。
-
-当前应用仍支持把 API 配置保存到本地 `gantt_generator/config/api_config.json`。该文件已经被 `.gitignore` 忽略，但仍建议只在本机使用，并在提交前检查：
-
-```bash
-git status --short
-```
-
-后续建议优先改为使用 `st.secrets` 或环境变量读取 API Key，避免把密钥写入项目文件。
 
 ## 技术栈
 
