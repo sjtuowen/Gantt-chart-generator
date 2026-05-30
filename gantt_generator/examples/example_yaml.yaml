@@ -1,0 +1,42 @@
+project: 论文实验计划
+date_format: YYYY-MM-DD
+
+tasks:
+  - name: 整理 APG 数据
+    start: 2026-06-01
+    end: 2026-06-05
+    group: 数据处理
+    status: done
+    progress: 100
+
+  - name: 清洗 y+ 数据
+    start: 2026-06-06
+    end: 2026-06-08
+    group: 数据处理
+    status: active
+    progress: 60
+    depends_on: 整理 APG 数据
+
+  - name: 跑 PSRN 主实验
+    start: 2026-06-09
+    end: 2026-06-15
+    group: 符号回归
+    status: active
+    progress: 20
+    depends_on: 清洗 y+ 数据
+
+  - name: 分析 Pareto front
+    start: 2026-06-16
+    end: 2026-06-18
+    group: 符号回归
+    status: pending
+    progress: 0
+    depends_on: 跑 PSRN 主实验
+
+  - name: 画论文图
+    start: 2026-06-19
+    end: 2026-06-23
+    group: 论文写作
+    status: pending
+    progress: 0
+    depends_on: 分析 Pareto front
