@@ -18,10 +18,13 @@ ENV/
 
 # Streamlit
 .streamlit/
+**/.streamlit/
 
 # Project data (user-specific)
 config/api_config.json
 projects/*.yaml
+**/config/api_config.json
+**/projects/*.yaml
 
 # OS
 .DS_Store

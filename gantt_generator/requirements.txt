@@ -4,3 +4,5 @@ plotly
 openpyxl
 pyyaml
 openai
+kaleido
+matplotlib

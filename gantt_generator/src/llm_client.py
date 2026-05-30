@@ -1,4 +1,6 @@
 import time
+from datetime import date
+
 from openai import OpenAI
 
 
@@ -7,17 +9,23 @@ TIMEOUT_SECONDS = 120
 
 
 def build_system_prompt(fmt: str) -> str:
-    base_rules = """Gantt chart task generator. Output ONLY task data, no explanations or markdown fences.
-Rules: Today=2026-05-30. Dates in 2026 after 2026-05-30. Task duration 2-14 days. Status: done/active/pending. Progress 0-100. 2-4 groups. depends_on=task name. 4-8 tasks."""
+    today = date.today().isoformat()
+    base_rules = f"""Gantt chart task generator. Output ONLY task data, no explanations or markdown fences.
+Rules: Today={today}. Dates should be after {today} unless the user specifies otherwise. Task duration 2-14 days. Status: done/active/pending. Progress 0-100. 2-4 groups. depends_on=task name. 4-8 tasks."""
 
     if fmt == "Table":
-        return base_rules + """ Format: pipe-separated, first line=header.
+        return (
+            base_rules
+            + """ Format: pipe-separated, first line=header.
 任务名 | 开始 | 结束 | 分组 | 状态 | 进度 | 依赖
 需求分析 | 2026-06-01 | 2026-06-05 | 规划 | done | 100 |
 系统设计 | 2026-06-06 | 2026-06-10 | 规划 | active | 80 | 需求分析"""
+        )
 
     if fmt == "YAML":
-        return base_rules + """ Format: YAML.
+        return (
+            base_rules
+            + """ Format: YAML.
 project: 软件开发项目
 date_format: YYYY-MM-DD
 tasks:
@@ -34,6 +42,7 @@ tasks:
     status: active
     progress: 80
     depends_on: 需求分析"""
+        )
 
     return base_rules
 
@@ -145,10 +154,18 @@ def generate_gantt_data(
 
     msg = str(last_error)
     if "524" in msg:
-        raise RuntimeError("API proxy timeout (524). The proxy server took too long. Try: 1) use a faster model, 2) retry, 3) switch API proxy.")
+        raise RuntimeError(
+            "API proxy timeout (524). The proxy server took too long. Try: 1) use a faster model, 2) retry, 3) switch API proxy."
+        )
     if "timed out" in msg.lower() or "timeout" in msg.lower():
-        raise RuntimeError(f"API request timed out after {TIMEOUT_SECONDS}s. Please try again or check your network.")
-    if "401" in msg or "invalid api key" in msg.lower() or "incorrect api key" in msg.lower():
+        raise RuntimeError(
+            f"API request timed out after {TIMEOUT_SECONDS}s. Please try again or check your network."
+        )
+    if (
+        "401" in msg
+        or "invalid api key" in msg.lower()
+        or "incorrect api key" in msg.lower()
+    ):
         raise RuntimeError("Invalid API Key. Please check your key and try again.")
     if "404" in msg or "not found" in msg.lower():
         raise RuntimeError("Model not found. Please check the Model name.")
