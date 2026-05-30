@@ -2,7 +2,9 @@ import json
 import os
 
 
-CONFIG_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "config")
+CONFIG_DIR = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "config"
+)
 CONFIG_PATH = os.path.join(CONFIG_DIR, "api_config.json")
 
 
@@ -18,7 +20,11 @@ def load_api_config() -> dict:
         with open(CONFIG_PATH, "r", encoding="utf-8") as f:
             config = json.load(f)
     except Exception:
-        return {"api_base": "https://api.openai.com/v1", "api_key": "", "model": "gpt-4o-mini"}
+        return {
+            "api_base": "https://api.openai.com/v1",
+            "api_key": "",
+            "model": "gpt-4o-mini",
+        }
 
     config.setdefault("api_base", "https://api.openai.com/v1")
     config.setdefault("api_key", "")

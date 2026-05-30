@@ -1,56 +1,65 @@
-# 📊 Gantt Chart Generator
+# Gantt Chart Generator
 
-一个基于 Streamlit 的本地甘特图生成器，支持从表格/YAML 输入快速生成交互式甘特图。
+一个基于 Streamlit 的本地甘特图生成器，支持表格文本或 YAML 输入，并生成可交互的 Plotly 甘特图、Mermaid 代码和多种导出文件。
 
-## ✨ 功能特点
+## 已实现功能
 
-- 🎯 **多格式输入**：支持表格文本（pipe-separated）和 YAML 格式
-- 📈 **交互式预览**：使用 Plotly 生成可交互的甘特图
-- 📝 **Mermaid 代码**：自动生成可复制到 Markdown 的 Mermaid Gantt 代码
-- 📥 **多格式导出**：支持 CSV、Excel、HTML、Markdown 导出
-- 🤖 **AI 辅助生成**：支持自然语言描述自动生成任务计划
-- 🔍 **视图切换**：日/周/月视图及自动适配
-- 📅 **今日标记**：可切换显示今日日期线
+- 表格文本输入：支持 pipe-separated 格式，允许 `group`、`status`、`progress`、`depends_on` 为空。
+- YAML 输入：支持从 `tasks` 字段读取任务列表。
+- Plotly 交互式预览：支持日、周、月和自动时间尺度。
+- 进度条显示：普通任务按包含结束日的时间范围绘制，单日任务也能正常显示。
+- Milestone 标记：`status: milestone` 的任务以菱形 marker 单独显示，不绘制普通任务条。
+- Mermaid 代码导出：可下载 Markdown 文件。
+- 数据导出：支持 CSV、Excel、HTML、Markdown。
+- 静态图片导出：支持真正的 PNG 和 PDF 文件下载；页面按钮默认使用 Matplotlib 普通静态图导出，不依赖浏览器。
+- AI 辅助生成：可通过兼容 OpenAI 的 API 从自然语言生成任务数据。
+- 项目保存/加载：本地保存项目 YAML。
 
-## 🚀 快速开始
-
-### 安装依赖
+## 安装依赖
 
 ```bash
 pip install -r gantt_generator/requirements.txt
 ```
 
-### 启动方式
+PNG/PDF 下载按钮默认使用 Matplotlib 生成普通静态图片/PDF。项目中也保留了 Plotly + Kaleido 导出函数；如果改用 Kaleido，新版 Kaleido 还需要本机可用的 Chrome/Chromium。
 
-**方式一：直接运行**
+## 启动
 
 ```bash
 cd gantt_generator
 streamlit run app.py
 ```
 
-**方式二：双击启动脚本**（Windows）
+浏览器通常会自动打开：
 
+```text
+http://localhost:8501
 ```
-启动甘特图.bat
-```
 
-### 访问应用
+Windows 也可以双击仓库根目录中的启动脚本。
 
-浏览器自动打开 http://localhost:8501
-
-## 📋 使用示例
-
-### 输入格式 - 表格模式
+## 表格输入示例
 
 ```text
 任务名 | 开始 | 结束 | 分组 | 状态 | 进度 | 依赖
 需求分析 | 2026-06-01 | 2026-06-05 | 规划 | done | 100 |
 系统设计 | 2026-06-06 | 2026-06-10 | 规划 | active | 80 | 需求分析
-前端开发 | 2026-06-11 | 2026-06-18 | 开发 | active | 40 | 系统设计
+发布里程碑 | 2026-06-20 | 2026-06-20 | 发布 | milestone | 0 | 系统设计
 ```
 
-### 输入格式 - YAML 模式
+字段说明：
+
+| 字段 | 必填 | 说明 |
+| --- | --- | --- |
+| 任务名 | 是 | 任务名称 |
+| 开始 | 是 | 开始日期，格式 `YYYY-MM-DD` |
+| 结束 | 是 | 结束日期，格式 `YYYY-MM-DD` |
+| 分组 | 否 | 为空时默认为 `General` |
+| 状态 | 否 | `done`、`active`、`pending`、`critical`、`milestone` |
+| 进度 | 否 | 0-100，为空时默认为 0 |
+| 依赖 | 否 | 前置任务名称 |
+
+## YAML 输入示例
 
 ```yaml
 project: 软件开发项目
@@ -64,55 +73,45 @@ tasks:
     status: done
     progress: 100
 
-  - name: 系统设计
-    start: 2026-06-06
-    end: 2026-06-10
-    group: 规划
-    status: active
-    progress: 80
+  - name: 发布里程碑
+    start: 2026-06-20
+    end: 2026-06-20
+    group: 发布
+    status: milestone
+    progress: 0
     depends_on: 需求分析
 ```
 
-## 🛠️ 技术栈
+## 导出说明
 
-- **Streamlit** - 本地 Web 界面框架
-- **Plotly** - 交互式图表库
-- **Pandas** - 数据处理
-- **OpenAI API** - AI 辅助生成（可选）
-- **PyYAML** - YAML 解析
-- **OpenPyXL** - Excel 导出
+- CSV：导出任务表。
+- Excel：导出任务表为 `.xlsx`。
+- HTML：导出可交互 Plotly 页面。
+- Markdown：导出 Mermaid 代码块。
+- PNG：下载 `gantt.png`，MIME 为 `image/png`。
+- PDF：下载 `gantt.pdf`，MIME 为 `application/pdf`。
 
-## 📁 项目结构
+如果 PNG/PDF 导出失败，页面会显示友好提示。当前页面按钮优先走 Matplotlib 兜底导出，可避开 Kaleido/Chrome 超时问题。
 
-```
-gantt_generator/
-├── app.py              # 主应用入口
-├── requirements.txt    # 依赖列表
-├── examples/           # 示例数据
-└── src/
-    ├── parser.py       # 输入解析
-    ├── gantt_plotly.py # Plotly 图表生成
-    ├── gantt_mermaid.py # Mermaid 代码生成
-    ├── export_excel.py  # Excel/CSV 导出
-    ├── export_static.py # 静态图片导出
-    ├── project_manager.py # 项目管理
-    ├── llm_client.py    # AI 客户端
-    ├── api_config.py    # API 配置
-    └── validators.py    # 数据校验
+## API Key 安全
+
+不要把 API Key 提交到 GitHub。
+
+当前应用仍支持把 API 配置保存到本地 `gantt_generator/config/api_config.json`。该文件已经被 `.gitignore` 忽略，但仍建议只在本机使用，并在提交前检查：
+
+```bash
+git status --short
 ```
 
-## 📝 字段说明
+后续建议优先改为使用 `st.secrets` 或环境变量读取 API Key，避免把密钥写入项目文件。
 
-| 字段 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| 任务名 | string | ✓ | 任务名称 |
-| 开始 | date | ✓ | 开始日期 (YYYY-MM-DD) |
-| 结束 | date | ✓ | 结束日期 (YYYY-MM-DD) |
-| 分组 | string | | 任务分组，默认 General |
-| 状态 | string | | done/active/pending/critical/milestone |
-| 进度 | int | | 0-100，默认 0 |
-| 依赖 | string | | 前置任务名称 |
+## 技术栈
 
-## 📄 许可证
-
-MIT License
+- Streamlit
+- Pandas
+- Plotly
+- Kaleido
+- Matplotlib
+- OpenPyXL
+- PyYAML
+- OpenAI API compatible client
